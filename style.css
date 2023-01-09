@@ -34,13 +34,13 @@ body{
 }
 
 .pickupSprite{
-    background: url(/bulletResized.png);
+    background: url(bulletResized.png);
     animation: spin 3s linear infinite;
     /* z-index: 2; */
 }
 
 .bulletSprite{
-    background: url(/ball.png);
+    background: url(ball.png);
     
     /* z-index: 2; */
 }
@@ -52,35 +52,35 @@ body{
 }
 
 .player[playerDirection ="down"][playerColour="blue"]  .playerSprite{
-    background: url(/blueDown.png);
+    background: url(blueDown.png);
   
 }
 .player[playerDirection ="down"][playerColour="red"] .playerSprite{
-    background: url(/redDown.png);
+    background: url(redDown.png);
    
 }
 .player[playerDirection ="up"][playerColour="blue"]  .playerSprite{
-    background: url(/blueUp.png);
+    background: url(blueUp.png);
   
 }
 .player[playerDirection ="up"][playerColour="red"] .playerSprite{
-    background: url(/redUp.png);
+    background: url(redUp.png);
    
 }
 .player[playerDirection ="right"][playerColour="blue"]  .playerSprite{
-    background: url(/blueRight.png);
+    background: url(blueRight.png);
   
 }
 .player[playerDirection ="right"][playerColour="red"] .playerSprite{
-    background: url(/redRight.png);
+    background: url(redRight.png);
    
 }
 .player[playerDirection ="left"][playerColour="blue"]  .playerSprite{
-    background: url(/blueLeft.png);
+    background: url(blueLeft.png);
   
 }
 .player[playerDirection ="left"][playerColour="red"] .playerSprite{
-    background: url(/redLeft.png);
+    background: url(redLeft.png);
    
 }
 
