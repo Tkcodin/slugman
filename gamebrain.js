@@ -86,12 +86,21 @@ if(firebase.database().ref(`bullets`)){
         let id = i;
         const nextBulletReference = firebase.database().ref(`bullets/${id}`);
         
+        // console.log("i got here!");
+
         let d = await getBD(id)
         let x = await getBX(id)
         let y = await getBY(id)
         let j = await getBI(id)
+        let p = await getBP(id)
+
+        // console.log("but not here!");
 
         console.log("bD: " + d + "bX: " + x + "bY: " + y);
+        
+        console.log("p: " + p + "playerId:" + playerId);
+
+        if(p===playerId){
 
         if(d==="down" && y< gameBoxData.maxY){
             nextBulletReference.set({
@@ -99,8 +108,12 @@ if(firebase.database().ref(`bullets`)){
                 bX: x,
                 bY: y + 1,
                 bI: j,
+                bP: p,
             })
-            checkForPlayers(x, y+1);
+
+            if(checkForPlayers(x, y+1)){
+                nextBulletReference.remove();
+            }
         }
         else if(d==="up"&& y> gameBoxData.minY){
             nextBulletReference.set({
@@ -108,8 +121,11 @@ if(firebase.database().ref(`bullets`)){
                 bX: x,
                 bY: y - 1,
                 bI: j,
+                bP: p,
             })
-            checkForPlayers(x, y-1);
+            if(checkForPlayers(x, y-1)){
+                nextBulletReference.remove();
+            }
         }
         else if(d==="left"&& x > gameBoxData.minX){
             nextBulletReference.set({
@@ -117,8 +133,11 @@ if(firebase.database().ref(`bullets`)){
                 bX: x - 1,
                 bY: y,
                 bI: j,
+                bP: p,
             })
-            checkForPlayers(x-1, y);
+            if(checkForPlayers(x-1, y)){
+                nextBulletReference.remove();
+            }
         }
         else if(d==="right"&&  x< gameBoxData.maxX){
             nextBulletReference.set({
@@ -126,12 +145,16 @@ if(firebase.database().ref(`bullets`)){
                 bX: x + 1,
                 bY: y,
                 bI: j,
+                bP: p,
             })
-            checkForPlayers(x+1, y);
+            if(checkForPlayers(x+1, y)){
+                nextBulletReference.remove();
+            }
         }
         else{
             nextBulletReference.remove();
         }
+    }
     }
     catch(error){}
     }
@@ -226,6 +249,12 @@ async function getBI(id){
     return s.val().bI;
 }
 
+async function getBP(id){
+    const nextBulletReference = firebase.database().ref(`bullets/${id}`);
+    let s = await nextBulletReference.once('value');
+    return s.val().bP;
+}
+
 async function shoot(){
     if(players[playerId].bullets>0){
         
@@ -235,11 +264,13 @@ async function shoot(){
     bY =players[playerId].y;
     bD = players[playerId].direction;
     bI = bulletId;
+    bP = playerId;
     bulletReference.set({
       bX,
       bY,
       bD,
       bI,
+      bP,
     })
     playerReference.update({
         bullets: players[playerId].bullets -1,
@@ -254,6 +285,7 @@ async function shoot(){
 
 
 function checkForPlayers(x,y){
+    hit = false;
     count = 0;
     s = x+"_"+y;
     c = 0;
@@ -268,14 +300,16 @@ function checkForPlayers(x,y){
     }
     playerLocations.forEach((element) => {
         string = String(element)
-        if(string.includes(s)){
+        if(string.includes(s) && !(string.includes(playerId))){
             playerLocations.splice(count, 1);
-            z = string.substring(c, string.length);
+            z = string.substring(c, string.length); 
             damagePlayers(z);
-            console.log("ID SPLICE: " + z);
+            console.log("ID SPLICE: " +string + " to: " + z + " c= " + c);
+            hit = true;
         }
         count++;
     })
+    return hit;
 }
 
 
