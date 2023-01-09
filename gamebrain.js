@@ -438,9 +438,7 @@ function grabAmmo(x,y){
         let x = players[playerId].bullets;
         grabAmmo(destX, destY); 
         let y = players[playerId].bullets;
-        if(y>x){
-            reload();
-        }
+        
         console.log("removing: " + destX + " " + destY);
     }
 
