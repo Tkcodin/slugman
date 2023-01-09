@@ -1,0 +1,116 @@
+.gameBox{
+    margin: auto;
+    width: 50%;
+    position: relative;
+    /*21*64 / 14*64 */
+    width: 1344px;
+    height: 896px;
+    background-color: pink;
+    border: 5px solid black;
+    padding: 10px 0;
+}
+
+body{
+    background-color: rgb(203, 218, 177);
+    
+}
+
+.grid-cell{
+    position: absolute;
+
+    /*need to resize erything arounbd this (based on image) */
+    width: 64px;
+    height: 64px;    
+}
+
+.player{
+    transition: transform 0.5s;
+
+}
+
+.player.me{
+    /*see yourself on top of other players*/
+   z-index: 1; 
+}
+
+.pickupSprite{
+    background: url(/bulletResized.png);
+    animation: spin 3s linear infinite;
+    /* z-index: 2; */
+}
+
+.bulletSprite{
+    background: url(/ball.png);
+    
+    /* z-index: 2; */
+}
+
+.playerSprite {
+    overflow: hidden;
+    /* background: url(/Soldiers/redDown.png); */
+
+}
+
+.player[playerDirection ="down"][playerColour="blue"]  .playerSprite{
+    background: url(/blueDown.png);
+  
+}
+.player[playerDirection ="down"][playerColour="red"] .playerSprite{
+    background: url(/redDown.png);
+   
+}
+.player[playerDirection ="up"][playerColour="blue"]  .playerSprite{
+    background: url(/blueUp.png);
+  
+}
+.player[playerDirection ="up"][playerColour="red"] .playerSprite{
+    background: url(/redUp.png);
+   
+}
+.player[playerDirection ="right"][playerColour="blue"]  .playerSprite{
+    background: url(/blueRight.png);
+  
+}
+.player[playerDirection ="right"][playerColour="red"] .playerSprite{
+    background: url(/redRight.png);
+   
+}
+.player[playerDirection ="left"][playerColour="blue"]  .playerSprite{
+    background: url(/blueLeft.png);
+  
+}
+.player[playerDirection ="left"][playerColour="red"] .playerSprite{
+    background: url(/redLeft.png);
+   
+}
+
+.player[playerColour="red"] .playerInfo{
+    position: absolute;
+    font-size: 12px;
+    top: -30px;
+    border-radius: 5px;
+    background: red;
+    color: white;
+    height: 30px;
+}
+
+.player[playerColour="blue"] .playerInfo{
+    position: absolute;
+    font-size: 12px;
+    top: -30px;
+    border-radius: 5px;
+    background: blue;
+    color: white;
+    height: 30px;
+}
+
+@keyframes spin{
+    0% {
+        transform: perspective(400px) rotateY(0);
+    }
+
+    100% {
+        transform: perspective(400px) rotateY(180deg);
+    }
+}
+
