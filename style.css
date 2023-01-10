@@ -28,9 +28,17 @@ body{
 
 }
 
+.explodeSmallSprite{
+    width: 64;
+    height: 50;
+    background: url(smallRed.png);
+    animation: fadeOut 2s linear infinite;
+    z-index: 1; 
+}
+
 .player.me{
     /*see yourself on top of other players*/
-   z-index: 1; 
+   z-index: 2; 
 }
 
 .pickupSprite{
@@ -38,6 +46,13 @@ body{
     animation: spin 3s linear infinite;
     /* z-index: 2; */
 }
+
+.pickupSprite2{
+    background: url(heart.png);
+    animation: spin 3s linear infinite;
+    /* z-index: 2; */
+}
+
 
 .bulletSprite{
     background: url(ball.png);
@@ -92,6 +107,7 @@ body{
     background: red;
     color: white;
     height: 30px;
+    width: 80px;
 }
 
 .player[playerColour="blue"] .playerInfo{
@@ -102,6 +118,7 @@ body{
     background: blue;
     color: white;
     height: 30px;
+    width: 80px;
 }
 
 @keyframes spin{
@@ -114,3 +131,7 @@ body{
     }
 }
 
+@keyframes fadeOut {
+    0% {opacity: 1;}
+    100% {opacity: 0;}
+ }

@@ -1,8 +1,18 @@
 const colours =  ["red", "blue"];
 
+const pickupValues =  ["b", "h"];
+
 let bMoves = 1;
 
+let moveOkay = true;
+
 let playerLocations = [];
+
+
+
+let pickupLocations = [];
+
+currentPickups = 0;
 
 // let shootTimer = -1;
     let bulletCount = 1;
@@ -12,12 +22,15 @@ let playerLocations = [];
   let playerReference;
   //ref to all players' fb
   let playerElements = {};
+
+  let explosionElements = {};
   //local list of players
   let players = {};
   const allPlayersReference = firebase.database().ref(`players`);
   const allPickupsReference = firebase.database().ref(`pickups`);
   const allBulletsReference = firebase.database().ref(`bullets`);
-  let pickups = {};
+  const allExplosionsReference = firebase.database().ref(`explosions`);
+  let pickups = [];
   let pickupElements = {};
   let bullets={};
     let bulletElements={};
@@ -48,18 +61,53 @@ function spawnPickups(){
     const xSpawn = Math.floor(Math.random()*(gameBoxData.maxX-1));
     const ySpawn = Math.floor(Math.random()*(gameBoxData.maxY-1));
     const pickupId = xSpawn + "_" + ySpawn;
-    console.log("pickup id: " + pickupId);
+    const p = playerId;
+    const v = randomArray(pickupValues);
+    
     const pickupReference = firebase.database().ref(`pickups/${pickupId}`);
     pickupReference.set({
         xSpawn,
         ySpawn,
+        p,
+        v,
     })
-
+    pickupLocations.push(xSpawn + "_" + ySpawn);
+    currentPickups++;
+    console.log(currentPickups + ": " + pickupId + " just spawned");
     setTimeout(() =>{
         spawnPickups();
     }, 20000
     )
 }
+
+function killPickups(){
+
+    if(currentPickups>2){
+            
+                    s = pickupLocations[0];
+                    const pickupReference = firebase.database().ref(`pickups/${s}`);
+                    pickupReference.remove();
+                    console.log("removing: " + s);
+                    pickupLocations.shift();
+                    currentPickups--;
+                    
+                
+    }
+    setTimeout(() =>{
+        killPickups();
+    }, 5000
+    )
+}
+
+// function killAllPickups(){
+//     for(let i = 0; i<pickupLocations.length; i++){
+//         s = pickupLocations[i];
+//         const pickupReference = firebase.database().ref(`pickups/${s}`);
+//         pickupReference.remove();
+//         console.log("removing: " + s);
+//         pickupLocations.shift();
+//     }
+// }
 
 
 // function reload(){
@@ -72,7 +120,25 @@ function spawnPickups(){
 //     // )
 // }
 
+function explodeBullet(x, y){
+    id = x+"_"+y;
+    const explodeRef = firebase.database().ref(`explosions/${id}`);
+    explodeRef.set({
+        eX: x,
+        eY: y,
+    })
 
+    setTimeout(() =>{
+        removeExplode(x,y);
+    }, 2000
+    )
+}
+
+function removeExplode(x,y){
+    id=x+"_"+y;
+    const explodeRef = firebase.database().ref(`explosions/${id}`);
+    explodeRef.remove(); 
+}
 
 
 
@@ -113,6 +179,7 @@ if(firebase.database().ref(`bullets`)){
 
             if(checkForPlayers(x, y+1)){
                 nextBulletReference.remove();
+                explodeBullet(x, y+1);
             }
         }
         else if(d==="up"&& y> gameBoxData.minY){
@@ -125,6 +192,7 @@ if(firebase.database().ref(`bullets`)){
             })
             if(checkForPlayers(x, y-1)){
                 nextBulletReference.remove();
+                explodeBullet(x, y-1);
             }
         }
         else if(d==="left"&& x > gameBoxData.minX){
@@ -137,6 +205,7 @@ if(firebase.database().ref(`bullets`)){
             })
             if(checkForPlayers(x-1, y)){
                 nextBulletReference.remove();
+                explodeBullet(x-1, y);
             }
         }
         else if(d==="right"&&  x< gameBoxData.maxX){
@@ -149,10 +218,12 @@ if(firebase.database().ref(`bullets`)){
             })
             if(checkForPlayers(x+1, y)){
                 nextBulletReference.remove();
+                explodeBullet(x+1, y);
             }
         }
         else{
             nextBulletReference.remove();
+            explodeBullet(x, y);
         }
     }
     }
@@ -171,8 +242,17 @@ if(firebase.database().ref(`bullets`)){
 
 
 
+async function getPickupPlayer(id){
+    const nextplayerReference = firebase.database().ref(`pickups/${id}`);
+    let s = await nextplayerReference.once('value');
+    return s.val().p;
+}
 
-
+async function getPickupValue(id){
+    const nextplayerReference = firebase.database().ref(`pickups/${id}`);
+    let s = await nextplayerReference.once('value');
+    return s.val().v;
+}
 
 
 
@@ -210,6 +290,12 @@ async function getPlayerColour(id){
     const nextplayerReference = firebase.database().ref(`players/${id}`);
     let s = await nextplayerReference.once('value');
     return s.val().colour;
+}
+
+async function getPlayerKills(id){
+    const nextplayerReference = firebase.database().ref(`players/${id}`);
+    let s = await nextplayerReference.once('value');
+    return s.val().kills;
 }
 
 async function getPlayerBullets(id){
@@ -348,6 +434,7 @@ async function damagePlayers(z){
     let n = await getPlayerName(z);
     let xs = await getPlayerX(z);
     let ys = await getPlayerY(z);
+    let k = await getPlayerKills(z);
     const nextPlayerReference = firebase.database().ref(`players/${z}`);
     nextPlayerReference.set({
         bullets: b,
@@ -358,30 +445,74 @@ async function damagePlayers(z){
         name: n,
         x: xs,
         y: ys,
+        kills: k,
     })
     if(h===1){
         killPlayer(i);
     }
 }
 
-function killPlayer(id){
+async function killPlayer(id){
+
     const nextPlayerReference = firebase.database().ref(`players/${id}`);
     nextPlayerReference.remove();
+    const nextPlayerReference2 = firebase.database().ref(`players/${playerId}`);
+
+    let h = await getPlayerHealth(playerId);
+    let b = await getPlayerBullets(playerId);
+    let c = await getPlayerColour(playerId);
+    let d = await getPlayerDirection(playerId);
+    let i = await getPlayerId(playerId);
+    let n = await getPlayerName(playerId);
+    let xs = await getPlayerX(playerId);
+    let ys = await getPlayerY(playerId);
+    let k = await getPlayerKills(playerId);
+    
+    nextPlayerReference2.set({
+        bullets: b,
+        colour: c,
+        direction: d,
+        health: h,
+        id: i,
+        name: n,
+        x: xs,
+        y: ys,
+        kills: k + 1,
+
+    })
+    
 }
 
-function grabAmmo(x,y){
+async function grabAmmo(x,y){
     const key = x + "_" + y;
+    
     if(pickups[key]){
+        let v = await getPickupValue(key);
+        console.log("value: " + v);
+        
+        if(v==="b"){
+            playerReference.update({
+                bullets: players[playerId].bullets + 3,
+            })
+        }
+        if(v==="h"){
+            playerReference.update({
+                health: players[playerId].health + 1,
+            })
+        }
         firebase.database().ref(`pickups/${key}`).remove();
-        playerReference.update({
-            bullets: players[playerId].bullets + 3,
-        })
         pickups[key]=false;
     }
 }
 
 
-
+function makeMoveOkay(){
+    moveOkay = true;
+    setTimeout(() =>{
+        makeMoveOkay();
+    }, 100
+    )
+}
 
 
 // document.addEventListener
@@ -389,10 +520,12 @@ function grabAmmo(x,y){
 //should run as main method
 (function (){
     
-     
+    
+        killPickups();
     
     
-        
+    
+    makeMoveOkay();    
     
 
     firebase.auth().onAuthStateChanged((user) => {
@@ -416,21 +549,25 @@ function grabAmmo(x,y){
                 y: ySpawn,
                 bullets: 10,
                 health: 5,
+                kills: 0,
             })
 
             //remove from FB when disconnect
             playerReference.onDisconnect().remove();
+            
+            
 
+            
 
             //BAD but how to remove properly?
             allPickupsReference.onDisconnect().remove();
             allBulletsReference.onDisconnect().remove();
-            
+
             
              joinGame();
         }
         else{
-
+            
         }
     })
 
@@ -469,9 +606,12 @@ function grabAmmo(x,y){
             players[playerId].direction = "down";
         }
         playerReference.set(players[playerId]);
-        let x = players[playerId].bullets;
+        // let x = players[playerId].bullets;
+
+        //try cause it will fail 95% of time and only succeed if pickup under person. must be a smarter way
+       
         grabAmmo(destX, destY); 
-        let y = players[playerId].bullets;
+        
         
         console.log("removing: " + destX + " " + destY);
     }
@@ -483,26 +623,64 @@ function grabAmmo(x,y){
     const gameBox = document.querySelector(".gameBox");
 
     function joinGame(){
-    
-        document.addEventListener('keyup', (event) =>{
+        
+        //THIS MUST BE MADE WORK FOR PICKUPS
+        window.addEventListener('beforeunload', function (killAllPickups) {
+            killAllPickups.preventDefault();
+        });
+
+        document.addEventListener('keydown', (event) =>{
             var name = event.key;
             if(name === 'w' || name === 'W'){
-                movementMan(0, -1);
+                if(moveOkay){
+                    movementMan(0, -1);
+                    moveOkay=false;
+                }
             }
             if(name === 's'|| name === 'S'){
-                movementMan(0, 1);
+                if(moveOkay){
+                    movementMan(0, 1);
+                    moveOkay=false;
+                }
             }
             if(name === 'a'|| name === 'A'){
-                movementMan(-1, 0);
+                if(moveOkay){
+                    movementMan(-1, 0);
+                    moveOkay=false;
+                }
             }
             if(name === 'd'|| name === 'D'){
-                movementMan(1, 0);
+                if(moveOkay){
+                    movementMan(1, 0);
+                    moveOkay=false;
+                }
             }
+            
+            
+
+
+        })
+        
+
+        // document.addEventListener('keyup', (event) =>{
+        //     var name = event.key;
+        //     if(name === 'w' || name === 'W'){
+        //         movementMan(0, -1);
+        //     }
+        //     if(name === 's'|| name === 'S'){
+        //         movementMan(0, 1);
+        //     }
+        //     if(name === 'a'|| name === 'A'){
+        //         movementMan(-1, 0);
+        //     }
+        //     if(name === 'd'|| name === 'D'){
+        //         movementMan(1, 0);
+        //     }
             
 
 
 
-        })
+        // })
         document.addEventListener('keyup', (event) =>{
             var name = event.key;
             
@@ -532,6 +710,7 @@ function grabAmmo(x,y){
                 playerElement2.querySelector(".playerName").innerText=playerState.name;
                 playerElement2.querySelector(".playerHealth").innerText="H: " + playerState.health;
                 playerElement2.querySelector(".playerBullets").innerText="B: " + playerState.bullets;
+                playerElement2.querySelector(".playerKills").innerText="K: " + playerState.kills;
                 playerElement2.setAttribute("playerColour", playerState.colour);
                 playerElement2.setAttribute("playerDirection", playerState.direction);
                 //changes needed here
@@ -603,13 +782,30 @@ function grabAmmo(x,y){
             const pickup = snapshot.val();
             const pickupElement = document.createElement("div");
             
+
+            const value = pickup.v;
+            console.log("value: " + value);
+
+
             pickupElement.classList.add("pickup", "grid-cell");
-            pickupElement.innerHTML = (`
-                <div class="pickupSprite grid-cell"></div>
-            `);
+            if(value === "b"){
+                pickupElement.innerHTML = (`
+                    <div class="pickupSprite grid-cell"></div>
+                `);
+            }
+            if(value === "h"){
+                pickupElement.innerHTML = (`
+                    <div class="pickupSprite2 grid-cell"></div>
+                `);
+            }
             const left = 32 *pickup.xSpawn + "px";
             const top = 32 * pickup.ySpawn + "px";
+            
             let key = pickup.xSpawn + "_" + pickup.ySpawn;
+
+
+            
+
             pickupElements[key] = pickupElement;
             pickups[key] = true;
             pickupElement.style.transform = `translate3d(${left}, ${top}, 0)`;
@@ -638,8 +834,32 @@ function grabAmmo(x,y){
             bulletCount = bulletCount+1;
         })
 
-       
-        
+        allExplosionsReference.on("child_added", (snapshot) => {
+            const explo = snapshot.val();
+            const exploElement = document.createElement("div");
+            
+            exploElement.classList.add("explo", "grid-cell");
+            exploElement.innerHTML = (`
+                <div class="explodeSmallSprite grid-cell"></div>
+            `);
+            const left = 32 *explo.eX + "px";
+            const top = 32 * explo.eY + "px";
+            let key = explo.eX + "_" + explo.eY;
+
+
+            
+
+            explosionElements[key] = exploElement;
+            // pickups[key] = true;
+            exploElement.style.transform = `translate3d(${left}, ${top}, 0)`;
+            gameBox.appendChild(exploElement);
+        })
+        allExplosionsReference.on("child_removed", (snapshot) => {
+            const explo = snapshot.val();
+            let s = explo.eX+"_"+explo.eY;
+            gameBox.removeChild(explosionElements[s]);
+            delete explosionElements[s];
+        })
 
         //working?
         allPickupsReference.on("child_removed", (snapshot) => {
@@ -647,6 +867,7 @@ function grabAmmo(x,y){
             let s = pickup.xSpawn + "_" + pickup.ySpawn;
             gameBox.removeChild(pickupElements[s]);
             delete pickupElements[s];
+            pickups[s] = false;
         })
 
         //listen for any player entering /existant players on me join
@@ -662,9 +883,10 @@ function grabAmmo(x,y){
             playerElement.innerHTML = (`
                 <div class="playerSprite grid-cell"></div>
                 <div class="playerInfo grid-cell">
-                    <span class="playerName"></span>
+                    <span class="playerName\n"></span>
                     <span class="playerHealth"></span>
                     <span class="playerBullets"></span>
+                    <span class="playerKills"></span>
                 </div>
                 `);
             playerElements[newPlayer.id] = playerElement;
@@ -672,6 +894,7 @@ function grabAmmo(x,y){
             playerElement.querySelector(".playerName").innerText=newPlayer.name;
             playerElement.querySelector(".playerHealth").innerText="H: " + newPlayer.health;
             playerElement.querySelector(".playerBullets").innerText="B: " + newPlayer.bullets;
+            playerElement.querySelector(".playerKills").innerText="K: " + newPlayer.kills;
             playerElement.setAttribute("playerColour", newPlayer.colour);
             playerElement.setAttribute("playerDirection", newPlayer.direction);
 
