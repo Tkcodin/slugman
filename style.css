@@ -1,17 +1,184 @@
-.gameBox{
+#gameBox{
     margin: auto;
     width: 50%;
-    position: relative;
+    position: absolute;
     /*21*64 / 14*64 */
     width: 1344px;
     height: 896px;
     background-color: pink;
     border: 5px solid black;
-    padding: 10px 0;
+    
+    visibility: hidden;
+    
+    
+}
+
+#hsDiv{
+    position: absolute;
+    margin: auto;
+    height: 600;
+    width: 300;
+    top: 100;
+    overflow-y: auto;
+    border: 5px solid black;
+    overflow-y:scroll;
+}
+
+#hsTable{
+    position: relative;
+    font-size: 10;
+    
+    
+}
+
+#return2{
+    top: 800;
+    width: 400;
+    height: 50;
+    font-size: 30;
+    position: absolute;
+    margin: auto;
+    border: 3px solid black;
+}
+
+
+#entryBox{
+        margin: auto;
+        width: 50%;
+        position: absolute;
+        /*21*64 / 14*64 */
+        width: 1344px;
+        height: 896px;
+        background-color: pink;
+        border: 5px solid black;
+        
+        visibility: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+
+#hsb{
+    margin: auto;
+    width: 50%;
+    position: absolute;
+    /*21*64 / 14*64 */
+    width: 1344px;
+    height: 896px;
+    background-color: pink;
+    border: 5px solid black;
+    
+    visibility: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+#logInBox2{
+    margin: auto;
+    width: 50%;
+    position: absolute;
+    /*21*64 / 14*64 */
+    width: 1344px;
+    height: 896px;
+    background-color: pink;
+    border: 5px solid black;
+    
+    visibility: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#cab{
+    margin: auto;
+    width: 50%;
+    position: absolute;
+    /*21*64 / 14*64 */
+    width: 1344px;
+    height: 896px;
+    background-color: pink;
+    border: 5px solid black;
+    
+    visibility: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    vertical-align: middle;
+}
+
+.form1{
+    
+    width: 400px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    font-size: 20;
+    
+}
+
+
+
+
+#cabInstructions{
+    font-size: 20;
+}
+
+.formInput{
+    display: inline-block;
+    width: 100%;
+    height: 30px;
+    font-size: 20;
+}
+
+.formButton{
+    width: 200px;
+    height: 50px;
+    font-size: 20;
+}
+
+.button1{
+    width: 400;
+    height: 50;
+    font-size: 30;
+    position: relative;
+    margin: auto;
+    border: 3px solid black;
+}
+
+#boxes{
+  position: absolute;
+  margin: auto;
+  width: 50%;
+  padding: 30px;
+
+}
+
+#logInBox{
+    margin: auto;
+    width: 50%;
+    position: absolute;
+    /*21*64 / 14*64 */
+    width: 1344px;
+    height: 896px;
+    background-color: pink;
+    border: 5px solid black;
+    
+    visibility: visible;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
 }
 
 body{
     background-color: rgb(203, 218, 177);
+    margin: auto;
+    
+   
     
 }
 

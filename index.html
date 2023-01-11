@@ -1,30 +1,92 @@
- <html>
-    <head>
-        <title>shootman420</title>
-        <link rel="stylesheet" href="style.css" type="text/css">
-    </head>
-    <body>
-        <div class =  "gameBox"></div>
+<html>
+  <head>
+      <title>shootman420</title>
+      <link rel="stylesheet" href="style.css" type="text/css">
+  </head>
+  <body>
+      <!-- <header id="main_header"> -->
+        <!-- <button class="button1" id="logIn">Log In</button>
+        <button class="button1" id="createAccount">Create Account</button>         -->
+      <!-- </header> -->
+      <!-- <main> -->
+      <div id="boxes">
         
-
-        <script src = "https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-        <script src = "https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-        <script src = "https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-        <script>
-            const firebaseConfig = {
-              apiKey: "AIzaSyAnVmgdCNkSd2Jj5LSCqnRtgrPU_S0KCIM",
-              authDomain: "shootman420.firebaseapp.com",
-              databaseURL: "https://shootman420-default-rtdb.asia-southeast1.firebasedatabase.app",
-              projectId: "shootman420",
-              storageBucket: "shootman420.appspot.com",
-              messagingSenderId: "636727716054",
-              appId: "1:636727716054:web:2cb6956694d8626c068177",
-              measurementId: "G-5JR4667HTD"
-            };
-          firebase.initializeApp(firebaseConfig);
-          </script>
+        <div id="cab">
           
-        <script src = "gamebrain.js"></script>
+          <form class="form1" onsubmit="createAccount()" method=null>
+            <label id="cabInstructions">Enter New Account Details</label>
+            <br>
+            <br>
+            User Name<input type="text" name="new_username" class="formInput" id="newUserName">
+            <br>
+            Password<input type="password" name="new_password_1"class="formInput" id="newPW1">
+            <br>
+            Confirm Password<input type="password" name="new_password_2" class="formInput" id="newPW2">
+            <br>
+          <input type="submit" class="formButton" >
+          </form>
+
+        </div>
+
+        <div id="hsb">
+          
+        </div>
+
+        <div id="entryBox">
+          <!-- //make this say respawn -->
+          <button class="button1" id="joinGame">Join Game</button> 
+          <button class="button1" id="highScores">High Scores</button> 
+          <button class="button1" id="logOut">Log out</button> 
+        </div>
+
+
+        <div id="logInBox2">
+          
+          <form class="form1" onsubmit="logIn()" method=null>
+            <label id="li2Instructions">Enter Existant Account Details</label>
+            <br>
+            <br>
+            User Name<input type="text" name="new_username" class="formInput" id="loginUN">
+            <br>
+            Password<input type="password" name="new_password_1"class="formInput" id="loginPW">
+            <br>
+          <input type="submit" class="formButton" >
+          </form>
+
+          <button class="button1" id="toCreate">
+            Or Create New Account
+          </button>
+
+        </div>
+      
+        <div id =  "gameBox"></div>
+        <div id= "logInBox">
+
+          <button class="button1" id="logIn">Log In</button>
+          <button class="button1" id="createAccount">Create Account</button> 
+
+        </div>
+      </div>
+
+      <script src = "https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+      <script src = "https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+      <script src = "https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+      <script>
+          const firebaseConfig = {
+            apiKey: "AIzaSyAnVmgdCNkSd2Jj5LSCqnRtgrPU_S0KCIM",
+            authDomain: "shootman420.firebaseapp.com",
+            databaseURL: "https://shootman420-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "shootman420",
+            storageBucket: "shootman420.appspot.com",
+            messagingSenderId: "636727716054",
+            appId: "1:636727716054:web:2cb6956694d8626c068177",
+            measurementId: "G-5JR4667HTD"
+          };
+        firebase.initializeApp(firebaseConfig);
+        </script>
         
-    </body>
- </html>
+      <!-- </main> -->
+      <script src = "gamebrain.js"></script>
+      
+  </body>
+</html>
