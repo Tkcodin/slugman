@@ -11,7 +11,7 @@ let secondTime = false;
 let hsBOX = document.getElementById("hsb");
 const gameBox = document.querySelector("#gameBox");
 let stopping = false;
-
+let mykills = 0;
 let eBOX = document.getElementById("entryBox");
 const colours =  ["red", "blue"];
 
@@ -206,7 +206,7 @@ async function makeHS(){
     // firebase.database().ref("accounts").orderByChild("hs").once("value").then((list) => {
         list.forEach((acc) => {
         let s = acc.val().userName + ":    " + acc.val().hs;
-            z = s + z;
+            // z = s + z;
             fuckArray(s);
     //     })
       })
@@ -436,14 +436,28 @@ function killPickups(){
 }
 
 
-function meDie(){
+async function meDie(){
     console.log("I am dying");
     //update my highscore
     let me = firebase.database().ref(`accounts/${unForGame}`);
+    let prev = await getAccountHS(unForGame);
+    let current = mykills;
+    
+
+    console.log("prev: "+ prev + " current: " + current);
+
+    let bigger = 0;
+    if(current>prev){
+        bigger = current;
+    }
+    else{
+        bigger = prev;
+    }
+
     me.set({
         password: mypw,
         userName: unForGame,
-        hs: players[playerId].kills,
+        hs: bigger,
     })
     // allBulletsReference.remove();
     // allPickupsReference.remove();
@@ -846,6 +860,7 @@ async function killPlayer(id){
     
     
     const nextPlayerReference = firebase.database().ref(`players/${id}`);
+    
     nextPlayerReference.remove();
     const nextPlayerReference2 = firebase.database().ref(`players/${playerId}`);
 
@@ -871,6 +886,8 @@ async function killPlayer(id){
         kills: k + 1,
 
     })
+
+    mykills++;
     
 }
 
