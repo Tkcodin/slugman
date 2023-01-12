@@ -972,7 +972,7 @@ function start2(){
             
 
             //BAD but how to remove properly?
-            allPickupsReference.onDisconnect().remove();
+            // allPickupsReference.onDisconnect().remove();
             // allBulletsReference.onDisconnect().remove();
 
             
