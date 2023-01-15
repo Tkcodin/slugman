@@ -68,7 +68,7 @@ function canMoveTo(x,y){
         y < gameBoxData.minY
     )
 
-    //functionality for bullets and obstacles and ammo/health here?
+    //functionality for bullets and obstacles and ammo/health here? VHANGE
 }
 
 
