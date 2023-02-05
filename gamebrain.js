@@ -1,22 +1,33 @@
+//********/
+
+//Set up
+
+//********/
+
+
 let unForGame = "";
 let mypw = "";
 let running = false;
 let lBOX2 = document.getElementById("logInBox2");
 let lBOX =document.getElementById("logInBox");
 let gBOX = document.getElementById("gameBox");
-
+let reloading = false;
 let cBOX = document.getElementById("cab");
 let BOXES = document.getElementById("boxes");
-
+let secondTime = false;
 let hsBOX = document.getElementById("hsb");
-
-
-
+const gameBox = document.querySelector("#gameBox");
+let stopping = false;
+let mykills = 0;
 let eBOX = document.getElementById("entryBox");
+let wlo = document.getElementById("welcomeLogOut");
+
+const HSMap = new Map();
+
 const colours =  ["red", "blue"];
 
 const pickupValues =  ["b", "h"];
-
+let hh = "";
 // let bMoves = 1;
 
 let moveOkay = true;
@@ -67,53 +78,66 @@ function canMoveTo(x,y){
         y >= gameBoxData.maxY ||
         y < gameBoxData.minY
     )
-
-    //functionality for bullets and obstacles and ammo/health here?
 }
+
+
+
+
+
+
+//********/
+
+//Navigating between views
+
+//********/
+
+
+
 
 
 function goEntryBox(){
     cBOX.style.visibility = "hidden";
     lBOX.style.visibility="hidden";
     gBOX.style.visibility="hidden";
+    wlo.style.visibility="hidden";
     lBOX2.style.visibility="hidden";
     hsBOX.style.visibility="hidden";
     eBOX.style.visibility="visible";
+    hh="";
     makeHS();
 }
-
 
 document.getElementById("logOut").addEventListener("click", function(){
     cBOX.style.visibility = "hidden";
     lBOX.style.visibility="visible";
     gBOX.style.visibility="hidden";
+    wlo.style.visibility="hidden";
     lBOX2.style.visibility="hidden";
     eBOX.style.visibility = "hidden";
     hsBOX.style.visibility="hidden";
-  
-   
-    // document.getElementById("logInBox").style.visibility="hidden";
-    // document.getElementById("logInBox").style.top="1000px";
-    // document.getElementById("gameBox").style.top="0px";
-    // document.getElementById("gameBox").style.visibility="visible";
-   
 });
 
+wlo.addEventListener("click", function(){
+    cBOX.style.visibility = "hidden";
+    lBOX.style.visibility="hidden";
+    gBOX.style.visibility="hidden";
+    wlo.style.visibility="hidden";
+    lBOX2.style.visibility="hidden";
+    hsBOX.style.visibility="hidden";
+    eBOX.style.visibility="visible";
+    playerReference.remove();
+    hh="";
+    makeHS();
+})
 
 document.getElementById("toCreate").addEventListener("click", function(){
     cBOX.style.visibility = "visible";
     lBOX.style.visibility="hidden";
     gBOX.style.visibility="hidden";
+    wlo.style.visibility="hidden";
     lBOX2.style.visibility="hidden";
     eBOX.style.visibility = "hidden";
     hsBOX.style.visibility="hidden";
-  
-   
-    // document.getElementById("logInBox").style.visibility="hidden";
-    // document.getElementById("logInBox").style.top="1000px";
-    // document.getElementById("gameBox").style.top="0px";
-    // document.getElementById("gameBox").style.visibility="visible";
-   
 });
 
 
@@ -121,36 +145,58 @@ document.getElementById("logIn").addEventListener("click", function(){
     cBOX.style.visibility = "hidden";
     lBOX.style.visibility="hidden";
     gBOX.style.visibility="hidden";
+    wlo.style.visibility="hidden";
     lBOX2.style.visibility="visible";eBOX.style.visibility = "hidden";
-    hsBOX.style.visibility="hidden";
-  
-   
-    // document.getElementById("logInBox").style.visibility="hidden";
-    // document.getElementById("logInBox").style.top="1000px";
-    // document.getElementById("gameBox").style.top="0px";
-    // document.getElementById("gameBox").style.visibility="visible";
-   
+    hsBOX.style.visibility="hidden";   
 });
 
 document.getElementById("joinGame").addEventListener("click", function(){
     cBOX.style.visibility = "hidden";
     lBOX.style.visibility="hidden";
     gBOX.style.visibility="visible";
+    wlo.style.visibility="visible";
     lBOX2.style.visibility="hidden";eBOX.style.visibility = "hidden";
     hsBOX.style.visibility="hidden";
     running = true;
-    start2();
-    // document.getElementById("logInBox").style.visibility="hidden";
-    // document.getElementById("logInBox").style.top="1000px";
-    // document.getElementById("gameBox").style.top="0px";
-    // document.getElementById("gameBox").style.visibility="visible";
-   
+    if(secondTime){
+        console.log("yeah g im reloaing");
+            //if add objects check this random spawn
+            let xSpawn = Math.floor(Math.random()*(gameBoxData.maxX-1));
+            let ySpawn = Math.floor(Math.random()*(gameBoxData.maxY-1));
+            console.log(xSpawn + " " + ySpawn);
+            //listen for auth change
+            
+            playerReference = firebase.database().ref(`players/${playerId}`);
+
+            playerReference.set({
+                id: playerId,
+                name: unForGame,
+                direction: "down",
+                //change this color selection
+                colour: randomArray(colours),
+                x: xSpawn,
+                y: ySpawn,
+                bullets: 10,
+                health: 5,
+                kills: 0,
+            })
+
+            //remove from FB when disconnect
+            playerReference.onDisconnect().remove();
+            
+            //BAD but how to remove properly?
+            allPickupsReference.onDisconnect().remove();
+             joinGame();     
+    }
+    else{
+        start2();
+    }  
 });
 
-let hh = "";
+
 let scores = {};
 
-function fuckArray(s){
+function killArray(s){
     hh = s + "<br>" + hh;
     // scores.push(s);
 }
@@ -164,8 +210,8 @@ async function makeHS(){
     // firebase.database().ref("accounts").orderByChild("hs").once("value").then((list) => {
         list.forEach((acc) => {
         let s = acc.val().userName + ":    " + acc.val().hs;
-            z = s + z;
-            fuckArray(s);
+            // z = s + z;
+            killArray(s);
     //     })
       })
 }
@@ -174,32 +220,62 @@ document.getElementById("highScores").addEventListener("click", function(){
     cBOX.style.visibility = "hidden";
     lBOX.style.visibility="hidden";
     gBOX.style.visibility="hidden";
+    wlo.style.visibility="hidden";
     lBOX2.style.visibility="hidden";eBOX.style.visibility = "hidden";
     hsBOX.style.visibility="visible";
 
 
-  
-//WORKING HERE
-
-   z = "Username: Highscore <br>";
-   z = z + hh;
-
-    console.log(z);
-
-    hsBOX.innerHTML=(`
-        <div id="hsDiv>
-        <label id="hsTable">
-            ` +  getZ(z) + `
-        </lable>
-        </div>
-        <button id="return2" onclick="goEntryBox()" >
-        Return
-        </button>
-          `)
-    
-  
    
+    const highScores = firebase.database().ref(`accounts`);
+    highScores.once("value").then(function(snapshot){
+        snapshot.forEach(function(childSnapshot) {
+            const UN = childSnapshot.val().userName;
+            const HS = childSnapshot.val().hs;
+            console.log("adding: " + UN + " " + HS);
+            HSMap.set(UN, HS);
+        });
+        console.log("HS Map: ");
+    HSMap.forEach(function(value, key){
+        console.log(key + ": " + value);
+    })
+    
+    
+    let sortedHSMap = Array.from(HSMap).sort((a, b) => b[1] - a[1]);
+ 
+    console.log("sorted: "+ sortedHSMap);
+    let z = "Username: Highscore <br>";
+    for (const [username, highscore] of sortedHSMap) {
+      z += `${username}: ${highscore} <br>`;
+    }
+    
+    hsBOX.innerHTML = `
+      <div id="hsDiv">
+        <label id="hsTable">
+          ${z}
+        </label>
+      </div>
+      <button id="return2" onclick="goEntryBox()">
+        Return
+      </button>
+    `;
+    });
+    
+
+    
 });
+
+
+
+
+
+
+
+//********/
+
+//Log in & create account
+
+//********/
+
 
 
 async function logIn(){
@@ -215,9 +291,12 @@ async function logIn(){
 
     let pw = await getAccountPassword(userName);
     let un = await getAccountUserName(userName);
-
+    
+    console.log(userName + " = " + un);
+    console.log(password + " = " + pw);
     try{
         if(un===userName){
+
             badun = false;
         }
         if(pw===password){
@@ -344,9 +423,23 @@ document.getElementById("createAccount").addEventListener("click", function(){
     console.log(cBOX);
     console.log(lBOX);
 
-    
-
 });
+
+
+
+
+
+
+
+
+//********/
+
+//animating game display from database info
+
+//********/
+
+
+
 
 function spawnPickups(){
     const xSpawn = Math.floor(Math.random()*(gameBoxData.maxX-1));
@@ -391,70 +484,40 @@ function killPickups(){
 }
 
 
-function meDie(){
-    
+async function meDie(){
+    console.log("I am dying");
     //update my highscore
     let me = firebase.database().ref(`accounts/${unForGame}`);
+    let prev = await getAccountHS(unForGame);
+    let current = mykills;
+    
+
+    console.log("prev: "+ prev + " current: " + current);
+
+    let bigger = 0;
+    if(current>prev){
+        bigger = current;
+    }
+    else{
+        bigger = prev;
+    }
+
     me.set({
         password: mypw,
         userName: unForGame,
-        hs: players[playerId].kills,
+        hs: bigger,
     })
-
-
-  allPickupsReference.remove();
+   
     playerReference.remove();
-    running = false;
-        lmoveOkay = true;
 
-    playerLocations = [];
+    setTimeout(() =>{
+    
+        goEntryBox(); 
+    }, 500
+    )
 
-    pickupLocations = [];
-
-    currentPickups = 0;
-
-
-    bulletCount = 1;
- 
-  playerId;
-  
-  playerReference;
-  //ref to all players' fb
-  playerElements = {}; 
-
-  explosionElements = {};
-  //local list of players
-  players = {};
-
-  pickups = [];
-  pickupElements = {};
-  bullets={};
-  bulletElements={};
-    goEntryBox();
-    console.log("RUNNING: " +running);
 }
 
-
-// function killAllPickups(){
-//     for(let i = 0; i<pickupLocations.length; i++){
-//         s = pickupLocations[i];
-//         const pickupReference = firebase.database().ref(`pickups/${s}`);
-//         pickupReference.remove();
-//         console.log("removing: " + s);
-//         pickupLocations.shift();
-//     }
-// }
-
-
-// function reload(){
-//     if(shootTimer>0){
-//         shootTimer=-1;
-//     }
-//     // setTimeout(() =>{
-//     //     reload();
-//     // }, 700
-//     // )
-// }
 
 function explodeBullet(x, y){
     id = x+"_"+y;
@@ -479,9 +542,7 @@ function removeExplode(x,y){
 
 
 async function moveBullets(){
-    
        
-    
 if(firebase.database().ref(`bullets`)){
     for(let i = bulletCount; i>0; i--){
         try{
@@ -565,7 +626,7 @@ if(firebase.database().ref(`bullets`)){
     }
     catch(error){}
     }
-    // bMoves = bMoves ;
+   
 }
 
     setTimeout(() =>{
@@ -575,6 +636,18 @@ if(firebase.database().ref(`bullets`)){
     
 
 }
+
+
+
+
+
+
+//********/
+
+//get infos from database
+
+//********/
+
 
 async function getAccountHS(id){
     try{
@@ -674,7 +747,7 @@ async function getPlayerHealth(id){
     return s.val().health;
 }
 
-//holy fuck
+
 async function getBD(id){
     const nextBulletReference = firebase.database().ref(`bullets/${id}`);
     let s = await nextBulletReference.once('value');
@@ -705,6 +778,19 @@ async function getBP(id){
     return s.val().bP;
 }
 
+
+
+
+
+
+//********/
+
+//gameplay functions
+
+//********/
+
+
+
 async function shoot(){
     if(players[playerId].bullets>0){
         
@@ -732,8 +818,6 @@ async function shoot(){
 }
 
           
-
-
 function checkForPlayers(x,y){
     hit = false;
     count = 0;
@@ -761,9 +845,6 @@ function checkForPlayers(x,y){
     })
     return hit;
 }
-
-
-
 
 
 async function damagePlayers(z){
@@ -795,9 +876,8 @@ async function damagePlayers(z){
 
 async function killPlayer(id){
 
-    
-    
     const nextPlayerReference = firebase.database().ref(`players/${id}`);
+    
     nextPlayerReference.remove();
     const nextPlayerReference2 = firebase.database().ref(`players/${playerId}`);
 
@@ -823,6 +903,8 @@ async function killPlayer(id){
         kills: k + 1,
 
     })
+
+    mykills++;
     
 }
 
@@ -858,19 +940,28 @@ function makeMoveOkay(){
 }
 
 
-// document.addEventListener
 
-//should run as main method
+
+
+
+
+//********/
+
+//main method & listeners
+
+//********/
+
+
 function start2(){
+    console.log("reloading: " + reloading + " 2ndtime: " + secondTime + "running : " + running + "stopping: "+ stopping);
     if(running){
     
     
         killPickups();
     
     
-    
     makeMoveOkay();    
-    
+
 
     firebase.auth().onAuthStateChanged((user) => {
         console.log(user)
@@ -899,20 +990,11 @@ function start2(){
             //remove from FB when disconnect
             playerReference.onDisconnect().remove();
             
-            
+            secondTime=true;
 
-            
-
-            //BAD but how to remove properly?
-            allPickupsReference.onDisconnect().remove();
-            // allBulletsReference.onDisconnect().remove();
-
-            
              joinGame();
         }
-        else{
-            
-        }
+      
     })
 
     //make auth change
@@ -923,11 +1005,6 @@ function start2(){
         console.log(errorCode, errorMessage);
     });
 
-
-
-    
-      
-   
 
     //default is zero
     function movementMan(xChange=0, yChange=0){
@@ -961,14 +1038,8 @@ function start2(){
     }
 
 
-   
-  
-
-    const gameBox = document.querySelector("#gameBox");
-
     function joinGame(){
-        
-        //THIS MUST BE MADE WORK FOR PICKUPS
+
         window.addEventListener('beforeunload', function (killAllPickups) {
             killAllPickups.preventDefault();
         });
@@ -1000,31 +1071,9 @@ function start2(){
                 }
             }
             
-            
-
-
         })
-        
-
-        // document.addEventListener('keyup', (event) =>{
-        //     var name = event.key;
-        //     if(name === 'w' || name === 'W'){
-        //         movementMan(0, -1);
-        //     }
-        //     if(name === 's'|| name === 'S'){
-        //         movementMan(0, 1);
-        //     }
-        //     if(name === 'a'|| name === 'A'){
-        //         movementMan(-1, 0);
-        //     }
-        //     if(name === 'd'|| name === 'D'){
-        //         movementMan(1, 0);
-        //     }
-            
 
 
-
-        // })
         document.addEventListener('keyup', (event) =>{
             var name = event.key;
             
@@ -1255,10 +1304,14 @@ function start2(){
             playerElement.style.transform = `translate3d(${left}, ${top}, 0)`;
             gameBox.appendChild(playerElement);
         })
-        
+    
+              
+              
+              }
     }        
 
 } 
 
+
     
-}
+
