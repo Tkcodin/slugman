@@ -4,19 +4,19 @@ let running = false;
 let lBOX2 = document.getElementById("logInBox2");
 let lBOX =document.getElementById("logInBox");
 let gBOX = document.getElementById("gameBox");
-let reloading = false;
+
 let cBOX = document.getElementById("cab");
 let BOXES = document.getElementById("boxes");
-let secondTime = false;
+
 let hsBOX = document.getElementById("hsb");
-const gameBox = document.querySelector("#gameBox");
-let stopping = false;
-let mykills = 0;
+
+
+
 let eBOX = document.getElementById("entryBox");
 const colours =  ["red", "blue"];
 
 const pickupValues =  ["b", "h"];
-let hh = "";
+
 // let bMoves = 1;
 
 let moveOkay = true;
@@ -68,7 +68,7 @@ function canMoveTo(x,y){
         y < gameBoxData.minY
     )
 
-    //functionality for bullets and obstacles and ammo/health here? VHANGE
+    //functionality for bullets and obstacles and ammo/health here?
 }
 
 
@@ -79,7 +79,6 @@ function goEntryBox(){
     lBOX2.style.visibility="hidden";
     hsBOX.style.visibility="hidden";
     eBOX.style.visibility="visible";
-    hh="";
     makeHS();
 }
 
@@ -140,48 +139,7 @@ document.getElementById("joinGame").addEventListener("click", function(){
     lBOX2.style.visibility="hidden";eBOX.style.visibility = "hidden";
     hsBOX.style.visibility="hidden";
     running = true;
-    if(secondTime){
-        console.log("yeah g im reloaind");
-            //if add objects check this random spawn
-            let xSpawn = Math.floor(Math.random()*(gameBoxData.maxX-1));
-            let ySpawn = Math.floor(Math.random()*(gameBoxData.maxY-1));
-            console.log(xSpawn + " " + ySpawn);
-            //listen for auth change
-            
-            playerReference = firebase.database().ref(`players/${playerId}`);
-
-            playerReference.set({
-                id: playerId,
-                name: unForGame,
-                direction: "down",
-                //change this color selection
-                colour: randomArray(colours),
-                x: xSpawn,
-                y: ySpawn,
-                bullets: 10,
-                health: 5,
-                kills: 0,
-            })
-
-            //remove from FB when disconnect
-            playerReference.onDisconnect().remove();
-            
-            
-
-            
-
-            //BAD but how to remove properly?
-            allPickupsReference.onDisconnect().remove();
-            // allBulletsReference.onDisconnect().remove();
-
-            
-             joinGame();
-            
-    }
-    else{
-        start2();
-    }
-    // start2();
+    start2();
     // document.getElementById("logInBox").style.visibility="hidden";
     // document.getElementById("logInBox").style.top="1000px";
     // document.getElementById("gameBox").style.top="0px";
@@ -189,7 +147,7 @@ document.getElementById("joinGame").addEventListener("click", function(){
    
 });
 
-
+let hh = "";
 let scores = {};
 
 function fuckArray(s){
@@ -206,7 +164,7 @@ async function makeHS(){
     // firebase.database().ref("accounts").orderByChild("hs").once("value").then((list) => {
         list.forEach((acc) => {
         let s = acc.val().userName + ":    " + acc.val().hs;
-            // z = s + z;
+            z = s + z;
             fuckArray(s);
     //     })
       })
@@ -257,12 +215,9 @@ async function logIn(){
 
     let pw = await getAccountPassword(userName);
     let un = await getAccountUserName(userName);
-    
-    console.log(userName + " = " + un);
-    console.log(password + " = " + pw);
+
     try{
         if(un===userName){
-
             badun = false;
         }
         if(pw===password){
@@ -436,64 +391,47 @@ function killPickups(){
 }
 
 
-async function meDie(){
-    console.log("I am dying");
+function meDie(){
+    
     //update my highscore
     let me = firebase.database().ref(`accounts/${unForGame}`);
-    let prev = await getAccountHS(unForGame);
-    let current = mykills;
-    
-
-    console.log("prev: "+ prev + " current: " + current);
-
-    let bigger = 0;
-    if(current>prev){
-        bigger = current;
-    }
-    else{
-        bigger = prev;
-    }
-
     me.set({
         password: mypw,
         userName: unForGame,
-        hs: bigger,
+        hs: players[playerId].kills,
     })
-    // allBulletsReference.remove();
-    // allPickupsReference.remove();
+
+
+  allPickupsReference.remove();
     playerReference.remove();
+    running = false;
+        lmoveOkay = true;
 
-    setTimeout(() =>{
-    //             lmoveOkay = true;
-    
-    //     playerLocations = [];
-    
-    //     pickupLocations = [];
-    
-    //     currentPickups = 0;
-    
-    
-    //     bulletCount = 1;
-    
-      
-    //   //ref to all players' fb
-    //   playerElements = {}; 
-    
-    //   explosionElements = {};
-    //   //local list of players
-    //   players = {};
-    
-    //   pickups = [];
-    //   pickupElements = {};
-    //   bullets={};
-    //   bulletElements={};
-    //   goEntryBox();
-        goEntryBox(); 
-    }, 500
-    )
+    playerLocations = [];
 
-    
-    
+    pickupLocations = [];
+
+    currentPickups = 0;
+
+
+    bulletCount = 1;
+ 
+  playerId;
+  
+  playerReference;
+  //ref to all players' fb
+  playerElements = {}; 
+
+  explosionElements = {};
+  //local list of players
+  players = {};
+
+  pickups = [];
+  pickupElements = {};
+  bullets={};
+  bulletElements={};
+    goEntryBox();
+    console.log("RUNNING: " +running);
 }
 
 
@@ -860,7 +798,6 @@ async function killPlayer(id){
     
     
     const nextPlayerReference = firebase.database().ref(`players/${id}`);
-    
     nextPlayerReference.remove();
     const nextPlayerReference2 = firebase.database().ref(`players/${playerId}`);
 
@@ -886,8 +823,6 @@ async function killPlayer(id){
         kills: k + 1,
 
     })
-
-    mykills++;
     
 }
 
@@ -927,7 +862,6 @@ function makeMoveOkay(){
 
 //should run as main method
 function start2(){
-    console.log("reloading: " + reloading + " 2ndtime: " + secondTime + "running : " + running + "stopping: "+ stopping);
     if(running){
     
     
@@ -937,8 +871,6 @@ function start2(){
     
     makeMoveOkay();    
     
-  
-
 
     firebase.auth().onAuthStateChanged((user) => {
         console.log(user)
@@ -967,18 +899,20 @@ function start2(){
             //remove from FB when disconnect
             playerReference.onDisconnect().remove();
             
-            secondTime=true;
+            
 
             
 
             //BAD but how to remove properly?
-            // allPickupsReference.onDisconnect().remove();
+            allPickupsReference.onDisconnect().remove();
             // allBulletsReference.onDisconnect().remove();
 
             
              joinGame();
         }
-      
+        else{
+            
+        }
     })
 
     //make auth change
@@ -1030,17 +964,9 @@ function start2(){
    
   
 
-    
+    const gameBox = document.querySelector("#gameBox");
 
     function joinGame(){
-
-    //     if(stopping){
-              
-    //         console.log("im in stopping");
-    
-    //   return;
-        
-    //   } 
         
         //THIS MUST BE MADE WORK FOR PICKUPS
         window.addEventListener('beforeunload', function (killAllPickups) {
@@ -1329,22 +1255,10 @@ function start2(){
             playerElement.style.transform = `translate3d(${left}, ${top}, 0)`;
             gameBox.appendChild(playerElement);
         })
-        // if (stopping){
-        //     console.log("im in stopping");
-            
-        //     stopping = false;
-            
-        //     running = false;
-             
-        // }
         
-              
-              
-              }
     }        
 
 } 
 
-
     
-
+}
