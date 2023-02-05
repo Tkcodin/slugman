@@ -13,6 +13,11 @@
     
 }
 
+.playerInfo{
+    text-align: center; 
+    font-size: 10;
+}
+
 #welcomeLogOut{
     
     width: 300;
